@@ -9,27 +9,48 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".NewPatientActivity" >
 
-    <TextView android:id="@+id/new_patient"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/text_size" />
-    
-     <TextView android:id="@+id/new_medicine"
+      <TextView android:id="@+id/new_patient"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="@dimen/text_size" 
-        />
+        android:text="@string/patient"/>
+      
+      <EditText android:id="@+id/patient_et"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:inputType="text"/>
+    
+      <TextView android:id="@+id/new_medicine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size" 
+        android:text="@string/medicine"
+        android:layout_marginTop="20dp"/>
 
-     
+      <EditText android:id="@+id/medicine_et"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:inputType="text"/>
+      
       <TextView android:id="@+id/new_consume_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/text_size" />
+        android:textSize="@dimen/text_size"
+        android:text="@string/consumption"
+        android:layout_marginTop="20dp" />
+      
+      <EditText android:id="@+id/consumption_et"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:inputType="text"/>
       
       <Button android:id="@+id/save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/save"
         android:textSize="@dimen/text_size"
-        android:onClick="savePatientDetails"/>
+        android:onClick="savePatientDetails"
+        android:layout_marginLeft="150dp"
+        android:layout_marginTop="20dp"/>
+      
 </LinearLayout>

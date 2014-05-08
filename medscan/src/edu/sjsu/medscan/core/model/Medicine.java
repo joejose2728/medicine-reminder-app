@@ -4,7 +4,16 @@ public class Medicine {
 
 	private String medicine;
 	private int quantity;
+	private String consumption;
 	
+	public String getConsumption() {
+		return consumption;
+	}
+
+	public void setConsumption(String consumption) {
+		this.consumption = consumption;
+	}
+
 	public String getMedicine() {
 		return medicine;
 	}

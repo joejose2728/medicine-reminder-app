@@ -8,4 +8,7 @@
     <string name="capture_new">New medicine</string>
     <string name="no_medicine">No medicine details added. Add new.</string>
     <string name="new_patient_title">New Medicine</string>
+    <string name="patient">Patient</string>
+    <string name="medicine">Medicine</string>
+    <string name="consumption">Consumption</string>
 </resources>

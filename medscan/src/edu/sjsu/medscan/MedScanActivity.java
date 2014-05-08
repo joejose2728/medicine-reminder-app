@@ -9,8 +9,6 @@ import java.util.List;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -18,7 +16,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.CalendarContract.Events;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,7 +28,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import edu.sjsu.medscan.core.intf.ITextExtractor;
-import edu.sjsu.medscan.core.model.Data;
+import edu.sjsu.medscan.core.model.Medicine;
+import edu.sjsu.medscan.dao.MedicinesDataSource;
 import edu.sjsu.medscan.ocr.AbbyyCloudOCR;
 
 public class MedScanActivity extends ListActivity {
@@ -41,7 +39,8 @@ public class MedScanActivity extends ListActivity {
 
 	private Uri fileUri;
 	private ProgressDialog progessDialog;
-	private List<Data> medicines;
+	//private List<Data> medicines;
+	private List<Medicine> medicines;
 	private MedicineAdapter adapter;
 	private Runnable viewMedicines;
 	private ListView listView;
@@ -49,8 +48,8 @@ public class MedScanActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		medicines = new ArrayList<Data>();
-
+		//medicines = new ArrayList<Data>();
+		medicines = new ArrayList<Medicine>();
 		listView = getListView();
 		adapter = new MedicineAdapter(this, R.layout.medicine_item, medicines);
 
@@ -87,7 +86,10 @@ public class MedScanActivity extends ListActivity {
 	};
 
 	protected void getData() {
-		medicines = Store.getData();
+		MedicinesDataSource datasource = new MedicinesDataSource(this);
+		datasource.open();
+		medicines = datasource.getAllMedicines();
+		datasource.close();
 		runOnUiThread(result);
 	}
 
@@ -107,18 +109,18 @@ public class MedScanActivity extends ListActivity {
 		}
 	}
 
-	private class MedicineAdapter extends ArrayAdapter<Data> {
+	private class MedicineAdapter extends ArrayAdapter<Medicine> {
 
-		private List<Data> items;
+		private List<Medicine> items;
 		private Context context;
 
-		private void setDataList(List<Data> items){
+		private void setMedicineList(List<Medicine> items) {
 			this.items = items;
 		}
-
-		public MedicineAdapter(Context context, int resource, List<Data> dataList) {
-			super(context, resource, dataList);
-			this.items = dataList;
+		
+		public MedicineAdapter(Context context, int resource, List<Medicine> medicineList) {
+			super(context, resource, medicineList);
+			this.items = medicineList;
 			this.context = context;
 		}
 
@@ -130,12 +132,10 @@ public class MedScanActivity extends ListActivity {
 			TextView bt = (TextView) row.findViewById(R.id.bottomtext);
 
 			//if (position <= items.size() - 1) {
-			Data d = items.get(position);
-			if (d != null){
-				tt.setText(d.getMedicine().getMedicine());
-				bt.setText(d.getPatient2Medicine().getFrequencyOfIntake()
-						+ " " + d.getPatient2Medicine().getQuantityPerIntake()
-						+ " by " + d.getPatient2Medicine().getMode());
+			Medicine m = items.get(position);
+			if (m != null){
+				tt.setText(m.getMedicine());
+				bt.setText(m.getConsumption());
 			}
 			//}
 			return row;
@@ -178,22 +178,6 @@ public class MedScanActivity extends ListActivity {
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-		/*//Log.d("Request code", data.getDataString());
-		Log.d("Result", resultCode+"");
-
-		if (requestCode == 100) {
-			if (resultCode == RESULT_OK) {
-				// Image captured and saved to fileUri specified in the Intent
-				Log.d("Result", data.getDataString());
-				Toast.makeText(this, "Image saved to:\n" +
-						data.getData(), Toast.LENGTH_LONG).show();
-			} else if (resultCode == RESULT_CANCELED) {
-				// User cancelled the image capture
-
-			} else {
-				// Image capture failed, advise user
-			}
-		}*/
 		switch (requestCode) {
 		case FILE_SELECT_CODE:
 			if (resultCode == RESULT_OK) {
@@ -205,7 +189,6 @@ public class MedScanActivity extends ListActivity {
 				try {
 					path = getPath(this, uri);
 					Log.d("File Path: ", path);
-					//Toast.makeText(this, path, Toast.LENGTH_LONG).show();
 					
 					if (path != null) {
 						progessDialog = ProgressDialog.show(this, "Please wait...", "Processing...");
@@ -221,7 +204,7 @@ public class MedScanActivity extends ListActivity {
 		case OCR_CODE:
 			adapter.clear();
 			getData();
-			adapter.setDataList(medicines);
+			adapter.setMedicineList(medicines);
 			listView.invalidateViews();    		
 			break;
 		}
@@ -291,6 +274,10 @@ public class MedScanActivity extends ListActivity {
 		return null;
 	} 
 
+	/**
+	 * Perform OCR task on cloud
+	 *
+	 */
 	private class PerformOCRTask extends AsyncTask<String, Void, String> {
 
 		protected void onPostExecute(String result) {
